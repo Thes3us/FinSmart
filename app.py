@@ -31,8 +31,17 @@ def get_db():
         else:
             db = g._database = sqlite3.connect(DATABASE)
             
-        db.row_factory = sqlite3.Row
     return db
+
+def query_db(query, args=(), one=False):
+    db = get_db()
+    cur = db.execute(query, args)
+    rv = cur.fetchall()
+    if not cur.description:
+        return rv
+    columns = [col[0] for col in cur.description]
+    res = [dict(zip(columns, row)) for row in rv]
+    return (res[0] if res else None) if one else res
 
 @app.teardown_appcontext
 def close_connection(exception):
@@ -76,8 +85,7 @@ def cashier():
                 
             if qty < 1: continue
             
-            cur.execute("SELECT price FROM products WHERE id = ?", (pid,))
-            product = cur.fetchone()
+            product = query_db("SELECT price FROM products WHERE id = ?", (pid,), one=True)
             if product:
                 price = product['price']
                 cur.execute("INSERT INTO sale_items (sale_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)",
@@ -87,7 +95,7 @@ def cashier():
         db.commit()
         return redirect(url_for('cashier'))
         
-    products = db.execute('SELECT * FROM products ORDER BY name').fetchall()
+    products = query_db('SELECT * FROM products ORDER BY name')
     return render_template('cashier.html', products=products)
 
 @app.route('/dashboard')
@@ -101,10 +109,10 @@ def dashboard():
         JOIN products p ON si.product_id = p.id
         WHERE date(s.created_at, 'localtime') = date('now', 'localtime')
     """
-    todays_sales = db.execute(todays_sales_query).fetchall()
+    todays_sales = query_db(todays_sales_query)
     total_revenue = sum(row['subtotal'] for row in todays_sales)
     
-    inventory = db.execute('SELECT * FROM products ORDER BY stock ASC').fetchall()
+    inventory = query_db('SELECT * FROM products ORDER BY stock ASC')
     
     return render_template('dashboard.html', 
                            todays_sales=todays_sales, 
@@ -137,7 +145,7 @@ def inventory():
                 db.commit()
         return redirect(url_for('inventory'))
         
-    products = db.execute('SELECT * FROM products ORDER BY name').fetchall()
+    products = query_db('SELECT * FROM products ORDER BY name')
     return render_template('inventory.html', products=products)
 
 @app.route('/revenue')
@@ -152,7 +160,7 @@ def revenue():
         GROUP BY day
         ORDER BY day ASC
     """
-    results = db.execute(query).fetchall()
+    results = query_db(query)
     
     dates = [row['day'] for row in results]
     revenues = [row['total'] for row in results]
