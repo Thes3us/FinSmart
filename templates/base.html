@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopFlow | {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="logo">
+            📦 Shop<span>Flow</span>
+        </div>
+        <a href="{{ url_for('cashier') }}" class="nav-link {% if request.endpoint == 'cashier' %}active{% endif %}">
+            🛒 Cashier
+        </a>
+        <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
+            📊 Dashboard
+        </a>
+        <a href="{{ url_for('inventory') }}" class="nav-link {% if request.endpoint == 'inventory' %}active{% endif %}">
+            📦 Inventory
+        </a>
+        <a href="{{ url_for('revenue') }}" class="nav-link {% if request.endpoint == 'revenue' %}active{% endif %}">
+            📈 Revenue
+        </a>
+    </aside>
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

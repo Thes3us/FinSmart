@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1>📊 Business Overview</h1>
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <h3>Today's Revenue</h3>
+        <div class="value">₹{{ "%.2f"|format(total_revenue|default(0.0)) }}</div>
+    </div>
+</div>
+
+<div class="glass-card">
+    <h2>Today's Sales</h2>
+    {% if todays_sales %}
+    <table>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Unit Price</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in todays_sales %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>₹{{ "%.2f"|format(item.unit_price) }}</td>
+                <td>₹{{ "%.2f"|format(item.subtotal) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: var(--text-muted); margin-top: 1rem;">No sales recorded today yet.</p>
+    {% endif %}
+</div>
+
+<div class="glass-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2 style="margin: 0;">Current Inventory Status</h2>
+        <a href="{{ url_for('inventory') }}" style="color: var(--primary); text-decoration: none;">Manage ></a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Price</th>
+                <th>Stock Level</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in inventory %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>₹{{ "%.2f"|format(item.price) }}</td>
+                <td>
+                    {% if item.stock <= 5 %}
+                        <span class="badge warning">{{ item.stock }} Low Stock</span>
+                    {% else %}
+                        <span class="badge success">{{ item.stock }} in Stock</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

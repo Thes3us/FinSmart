@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Cashier{% endblock %}
+
+{% block content %}
+<h1>🛒 Cashier POS</h1>
+
+<div class="glass-card">
+    <h2>Current Transaction</h2>
+    <form method="POST" action="{{ url_for('cashier') }}" id="sale-form">
+        <div id="items-container">
+            <!-- First row -->
+            <div class="form-row item-row">
+                <div class="form-group" style="flex: 2;">
+                    <label>Product</label>
+                    <select name="product_id[]" required>
+                        <option value="" disabled selected>Select an item...</option>
+                        {% for p in products %}
+                        <option value="{{ p.id }}">{{ p.name }} - ₹{{ "%.2f"|format(p.price) }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label>Quantity</label>
+                    <input type="number" name="quantity[]" min="1" value="1" required>
+                </div>
+                <button type="button" class="danger remove-btn" onclick="removeRow(this)">🗑</button>
+            </div>
+        </div>
+        
+        <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+            <button type="button" onclick="addRow()" style="background: var(--surface-hover); color: var(--text-main);">
+                ➕ Add Item
+            </button>
+            <button type="submit">✅ Submit Sale</button>
+        </div>
+    </form>
+</div>
+
+<!-- Template for new rows -->
+<template id="row-template">
+    <div class="form-row item-row">
+        <div class="form-group" style="flex: 2;">
+            <label>Product</label>
+            <select name="product_id[]" required>
+                <option value="" disabled selected>Select an item...</option>
+                {% for p in products %}
+                <option value="{{ p.id }}">{{ p.name }} - ₹{{ "%.2f"|format(p.price) }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group" style="flex: 1;">
+            <label>Quantity</label>
+            <input type="number" name="quantity[]" min="1" value="1" required>
+        </div>
+        <button type="button" class="danger remove-btn" onclick="removeRow(this)">🗑</button>
+    </div>
+</template>
+
+<script>
+    function addRow() {
+        const template = document.getElementById('row-template');
+        const container = document.getElementById('items-container');
+        container.appendChild(template.content.cloneNode(true));
+    }
+    
+    function removeRow(btn) {
+        const row = btn.closest('.item-row');
+        if (document.querySelectorAll('.item-row').length > 1) {
+            row.remove();
+        }
+    }
+</script>
+{% endblock %}

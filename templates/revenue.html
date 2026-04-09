@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Revenue History{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<h1>📈 Revenue History (Last 30 Days)</h1>
+
+<div class="glass-card">
+    <canvas id="revenueChart" width="400" height="150"></canvas>
+</div>
+
+<div class="glass-card">
+    <h2>Daily Revenue Summary</h2>
+    {% if results %}
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Total Revenue</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in results %}
+            <tr>
+                <td>{{ row.day }}</td>
+                <td>₹{{ "%.2f"|format(row.total) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: var(--text-muted); margin-top: 1rem;">No revenue data available.</p>
+    {% endif %}
+</div>
+
+<script>
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    
+    // Injecting data from Jinja
+    const labels = {{ dates|tojson }};
+    const dataPoints = {{ revenues|tojson }};
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Daily Revenue (₹)',
+                data: dataPoints,
+                backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                    ticks: { color: '#94a3b8' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#94a3b8' }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: { color: '#f8fafc' }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
